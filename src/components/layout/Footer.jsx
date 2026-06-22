@@ -10,9 +10,9 @@ const Footer = () => {
                     <div>
                         <Link to="/" className="flex items-center gap-2 mb-4">
                             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
-                                <span className="text-white font-bold text-lg">E</span>
+                                <span className="text-white font-bold text-lg">C</span>
                             </div>
-                            <span className="text-xl font-bold text-white">EduFlow</span>
+                            <span className="text-xl font-bold text-white">Coursen</span>
                         </Link>
                         <p className="text-sm text-gray-400 leading-relaxed mb-4">
                             Empowering learners and instructors worldwide with high-quality, accessible online education.
@@ -74,8 +74,8 @@ const Footer = () => {
                 </div>
 
                 <div className="border-t border-gray-800 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-sm text-text-secondary">Â© 2026 EduFlow. All rights reserved.</p>
-                    <p className="text-sm text-text-secondary">Made with â¤ï¸ for learners everywhere</p>
+                    <p className="text-sm text-text-secondary">Â© 2026 Coursen. All rights reserved.</p>
+                    <p className="text-sm text-text-secondary">Made with FCI Team¸ for learners everywhere</p>
                 </div>
             </div>
         </footer>

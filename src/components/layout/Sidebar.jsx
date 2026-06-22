@@ -1,9 +1,9 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toggleSidebar } from '../../features/uiSlice';
-import { logout } from '../../features/authSlice';
+import { logoutUser } from '../../features/authSlice';
 import {
     HiHome,
     HiBookOpen,
@@ -44,12 +44,13 @@ const Sidebar = () => {
         { path: '/instructor/courses/new', icon: HiPlusCircle, label: 'Create Course' },
         { path: '/instructor/quiz/new', icon: HiClipboardList, label: 'Quiz Builder' },
         { path: '/instructor/analytics', icon: HiChartBar, label: 'Analytics' },
+        { path: '/instructor/profile', icon: HiUser, label: 'Profile' },
     ];
 
     const links = isInstructor ? instructorLinks : studentLinks;
 
-    const handleLogout = () => {
-        dispatch(logout());
+    const handleLogout = async () => {
+        await dispatch(logoutUser());
         navigate('/');
     };
 
@@ -96,11 +97,17 @@ const Sidebar = () => {
                 {/* User Info */}
                 <div className="p-4 border-b border-border">
                     <div className="flex items-center gap-3">
-                        <img
-                            src={user?.avatar}
-                            alt={user?.name}
-                            className="w-10 h-10 rounded-xl object-cover ring-2 ring-primary-100 shrink-0"
-                        />
+                        {user?.avatar ? (
+                            <img
+                                src={user.avatar}
+                                alt={user?.name}
+                                className="w-10 h-10 rounded-xl object-cover ring-2 ring-primary-100 shrink-0"
+                            />
+                        ) : (
+                            <div className="w-10 h-10 rounded-xl ring-2 ring-primary-100 bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                                {(user?.name || 'U')[0].toUpperCase()}
+                            </div>
+                        )}
                         <AnimatePresence>
                             {(sidebarOpen || isMobile) && (
                                 <motion.div

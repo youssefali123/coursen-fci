@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
@@ -14,35 +14,23 @@ const Login = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        dispatch(loginUser(email, password));
+        dispatch(clearError());
 
-        // Check for success after timeout (simulated API)
-        setTimeout(() => {
-            const state = import.meta.env;
-            // We'll check via the store subscription instead
-        }, 1000);
-    };
+        const result = await dispatch(loginUser({ email, password }));
 
-    // Quick login buttons for demo
-    const quickLogin = (role) => {
-        const creds = role === 'student'
-            ? { email: 'ali@example.com', password: 'password123' }
-            : { email: 'youssef@example.com', password: 'password123' };
-
-        setEmail(creds.email);
-        setPassword(creds.password);
-        dispatch(loginUser(creds.email, creds.password));
-
-        setTimeout(() => {
-            toast.success(`Logged in as ${role}!`);
-            navigate(role === 'student' ? '/student/dashboard' : '/instructor/dashboard');
-        }, 1000);
+        if (loginUser.fulfilled.match(result)) {
+            toast.success('Logged in successfully!');
+            const role = result.payload?.role;
+            navigate(role === 'instructor' ? '/instructor/dashboard' : '/student/dashboard');
+        } else {
+            toast.error(result.payload || 'Login failed');
+        }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-white to-purple-50 dark:from-surface dark:via-surface dark:to-surface px-4 py-12">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-white to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 px-4 py-12">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -63,34 +51,6 @@ const Login = () => {
 
                 {/* Form Card */}
                 <div className="bg-card rounded-2xl shadow-xl shadow-gray-200/50 dark:shadow-black/40 border border-border p-8">
-                    {/* Quick Login */}
-                    <div className="mb-6">
-                        <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">Quick Demo Login</p>
-                        <div className="grid grid-cols-2 gap-3">
-                            <button
-                                onClick={() => quickLogin('student')}
-                                className="px-4 py-2.5 text-sm font-medium bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100 transition-colors border border-emerald-100"
-                            >
-                                👨‍🎓 Student
-                            </button>
-                            <button
-                                onClick={() => quickLogin('instructor')}
-                                className="px-4 py-2.5 text-sm font-medium bg-purple-50 text-purple-700 rounded-xl hover:bg-purple-100 transition-colors border border-purple-100"
-                            >
-                                👨‍🏫 Instructor
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="relative my-6">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-border"></div>
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="px-3 bg-card text-gray-400">or sign in with email</span>
-                        </div>
-                    </div>
-
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {error && (
                             <motion.div
@@ -107,12 +67,14 @@ const Login = () => {
                             <div className="relative">
                                 <HiMail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                 <input
+                                    id="login-email"
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="you@example.com"
                                     className="w-full pl-11 pr-4 py-3 rounded-xl border border-border focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none text-sm transition-all"
                                     required
+                                    autoComplete="email"
                                 />
                             </div>
                         </div>
@@ -122,12 +84,14 @@ const Login = () => {
                             <div className="relative">
                                 <HiLockClosed className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                 <input
+                                    id="login-password"
                                     type={showPassword ? 'text' : 'password'}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="Enter your password"
                                     className="w-full pl-11 pr-11 py-3 rounded-xl border border-border focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none text-sm transition-all"
                                     required
+                                    autoComplete="current-password"
                                 />
                                 <button
                                     type="button"
@@ -144,12 +108,13 @@ const Login = () => {
                                 <input type="checkbox" className="rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
                                 <span className="text-sm text-text-secondary">Remember me</span>
                             </label>
-                            <a href="#" className="text-sm text-primary-600 hover:text-primary-700 font-medium">
+                            <Link to="/forgot-password" className="text-sm text-primary-600 hover:text-primary-700 font-medium">
                                 Forgot password?
-                            </a>
+                            </Link>
                         </div>
 
                         <button
+                            id="login-submit"
                             type="submit"
                             disabled={loading}
                             className="w-full py-3 bg-gradient-to-r from-primary-500 to-primary-700 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-primary-500/30 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
@@ -179,4 +144,3 @@ const Login = () => {
 };
 
 export default Login;
-

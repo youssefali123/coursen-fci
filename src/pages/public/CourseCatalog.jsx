@@ -1,43 +1,65 @@
-﻿import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
-import { HiSearch, HiFilter, HiViewGrid, HiX } from 'react-icons/hi';
-import { setSearchQuery, setSelectedCategory, setSelectedLevel, setSortBy } from '../../features/coursesSlice';
+import { HiSearch, HiFilter, HiX, HiChevronLeft, HiChevronRight } from 'react-icons/hi';
+import { setSearchQuery, setSelectedCategory, setSelectedLevel, setSortBy, setCurrentPage, fetchAllCourses, fetchCoursesByCategory } from '../../features/coursesSlice';
+import { fetchCategories } from '../../features/categorySlice';
 import CourseCard from '../../components/common/CourseCard';
-import { categories } from '../../data/categories';
 
 const CourseCatalog = () => {
     const dispatch = useDispatch();
-    const { courses, searchQuery, selectedCategory, selectedLevel, sortBy } = useSelector((s) => s.courses);
+    const { courses, searchQuery, selectedCategory, selectedLevel, sortBy, loading, currentPage, totalPages, pageSize } = useSelector((s) => s.courses);
+    const { categories } = useSelector((s) => s.category);
     const [showFilters, setShowFilters] = useState(false);
     const levels = ['Beginner', 'Intermediate', 'Advanced'];
+
+    // Fetch categories and courses from API on mount and when page/category changes
+    useEffect(() => { dispatch(fetchCategories()); }, [dispatch]);
+
+    useEffect(() => {
+        if (selectedCategory) {
+            dispatch(fetchCoursesByCategory({ categoryId: selectedCategory, pageSize, pageNumber: currentPage }));
+        } else {
+            dispatch(fetchAllCourses({ pageSize, pageNumber: currentPage }));
+        }
+    }, [dispatch, currentPage, selectedCategory, pageSize]);
 
     const filteredCourses = useMemo(() => {
         let result = [...courses];
         if (searchQuery) {
             const q = searchQuery.toLowerCase();
-            result = result.filter((c) => c.title.toLowerCase().includes(q) || c.tags.some((t) => t.toLowerCase().includes(q)));
+            result = result.filter((c) => c.title?.toLowerCase().includes(q) || c.shortDescription?.toLowerCase().includes(q) || (c.tags && c.tags.some((t) => t.toLowerCase().includes(q))));
         }
-        if (selectedCategory) result = result.filter((c) => c.categoryId === selectedCategory);
-        if (selectedLevel) result = result.filter((c) => c.level === selectedLevel);
+        if (selectedLevel) {
+            result = result.filter((c) => {
+                const lvl = typeof c.level === 'number' ? ['Beginner', 'Intermediate', 'Advanced'][c.level] : c.level;
+                return lvl === selectedLevel;
+            });
+        }
         switch (sortBy) {
-            case 'rating': result.sort((a, b) => b.rating - a.rating); break;
-            case 'newest': result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); break;
-            case 'price-low': result.sort((a, b) => a.price - b.price); break;
-            case 'price-high': result.sort((a, b) => b.price - a.price); break;
-            default: result.sort((a, b) => b.studentsCount - a.studentsCount);
+            case 'rating': result.sort((a, b) => (b.rate || b.rating || 0) - (a.rate || a.rating || 0)); break;
+            case 'newest': result.sort((a, b) => new Date(b.createdDate || b.createdAt || 0) - new Date(a.createdDate || a.createdAt || 0)); break;
+            case 'price-low': result.sort((a, b) => (a.price || 0) - (b.price || 0)); break;
+            case 'price-high': result.sort((a, b) => (b.price || 0) - (a.price || 0)); break;
+            default: result.sort((a, b) => (b.studentsCount || 0) - (a.studentsCount || 0));
         }
         return result;
-    }, [courses, searchQuery, selectedCategory, selectedLevel, sortBy]);
+    }, [courses, searchQuery, selectedLevel, sortBy]);
 
     const clearFilters = () => { dispatch(setSearchQuery('')); dispatch(setSelectedCategory(null)); dispatch(setSelectedLevel(null)); dispatch(setSortBy('popular')); };
     const hasActiveFilters = searchQuery || selectedCategory || selectedLevel;
+
+    const handlePageChange = (page) => {
+        if (page >= 1 && page <= totalPages) {
+            dispatch(setCurrentPage(page));
+        }
+    };
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
                 <h1 className="text-3xl font-bold text-text-primary mb-2">Explore <span className="gradient-text">Courses</span></h1>
-                <p className="text-text-secondary">Discover {courses.length}+ courses to boost your career</p>
+                <p className="text-text-secondary">Discover courses to boost your career</p>
             </motion.div>
 
             <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -97,7 +119,13 @@ const CourseCatalog = () => {
 
             <p className="text-sm text-text-secondary mb-4">Showing <span className="font-semibold text-text-secondary">{filteredCourses.length}</span> courses</p>
 
-            {filteredCourses.length > 0 ? (
+            {loading ? (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {[...Array(8)].map((_, i) => (
+                        <div key={i} className="animate-pulse bg-card rounded-2xl border border-border h-72" />
+                    ))}
+                </div>
+            ) : filteredCourses.length > 0 ? (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {filteredCourses.map((course, i) => <CourseCard key={course.id} course={course} index={i} />)}
                 </div>
@@ -108,9 +136,28 @@ const CourseCatalog = () => {
                     <button onClick={clearFilters} className="px-5 py-2 bg-primary-500 text-white rounded-xl text-sm font-medium">Clear Filters</button>
                 </div>
             )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-8">
+                    <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage <= 1}
+                        className="p-2 rounded-lg border border-border text-text-secondary hover:bg-primary-50 disabled:opacity-40 transition-all">
+                        <HiChevronLeft className="w-5 h-5" />
+                    </button>
+                    {[...Array(totalPages)].map((_, i) => (
+                        <button key={i} onClick={() => handlePageChange(i + 1)}
+                            className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${currentPage === i + 1 ? 'bg-primary-500 text-white' : 'border border-border text-text-secondary hover:bg-primary-50'}`}>
+                            {i + 1}
+                        </button>
+                    ))}
+                    <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage >= totalPages}
+                        className="p-2 rounded-lg border border-border text-text-secondary hover:bg-primary-50 disabled:opacity-40 transition-all">
+                        <HiChevronRight className="w-5 h-5" />
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
 
 export default CourseCatalog;
-

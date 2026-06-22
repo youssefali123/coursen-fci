@@ -1,9 +1,9 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiMenu, HiX, HiSearch, HiBell, HiChevronDown, HiMoon, HiSun } from 'react-icons/hi';
-import { logout } from '../../features/authSlice';
+import { logoutUser } from '../../features/authSlice';
 import { toggleTheme } from '../../features/uiSlice';
 
 const Navbar = () => {
@@ -23,10 +23,10 @@ const Navbar = () => {
         { path: '/courses', label: 'Courses' },
     ];
 
-    const handleLogout = () => {
-        dispatch(logout());
-        navigate('/');
+    const handleLogout = async () => {
         setProfileDropdown(false);
+        await dispatch(logoutUser());
+        navigate('/');
     };
 
     const getDashboardLink = () => {
@@ -41,9 +41,9 @@ const Navbar = () => {
                     {/* Logo */}
                     <Link to="/" className="flex items-center gap-2 group">
                         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg shadow-primary-500/30 group-hover:shadow-primary-500/50 transition-shadow">
-                            <span className="text-white font-bold text-lg">E</span>
+                            <span className="text-white font-bold text-lg">C</span>
                         </div>
-                        <span className="text-xl font-bold gradient-text hidden sm:block">EduFlow</span>
+                        <span className="text-xl font-bold gradient-text hidden sm:block">Coursen</span>
                     </Link>
 
                     {/* Desktop Nav */}
@@ -94,11 +94,17 @@ const Navbar = () => {
                                         onClick={() => setProfileDropdown(!profileDropdown)}
                                         className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-primary-100 dark:bg-primary-900/40 dark:hover:bg-primary-900/30 transition-all"
                                     >
-                                        <img
-                                            src={user.avatar}
-                                            alt={user.name}
-                                            className="w-8 h-8 rounded-lg object-cover ring-2 ring-primary-200"
-                                        />
+                                        {user.avatar ? (
+                                             <img
+                                                 src={user.avatar}
+                                                 alt={user.name}
+                                                 className="w-8 h-8 rounded-lg object-cover ring-2 ring-primary-200"
+                                             />
+                                         ) : (
+                                             <div className="w-8 h-8 rounded-lg ring-2 ring-primary-200 bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-xs font-bold">
+                                                 {(user.name || 'U')[0].toUpperCase()}
+                                             </div>
+                                         )}
                                         <span className="hidden sm:block text-sm font-medium text-text-secondary">{user.name}</span>
                                         <HiChevronDown className="w-4 h-4 text-gray-400" />
                                     </button>

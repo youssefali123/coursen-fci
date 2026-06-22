@@ -1,12 +1,21 @@
-﻿import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
 import { HiPlay, HiUsers, HiAcademicCap, HiStar, HiArrowRight, HiCheckCircle } from 'react-icons/hi';
 import CourseCard from '../../components/common/CourseCard';
-import { courses } from '../../data/courses';
+import { fetchAllCourses } from '../../features/coursesSlice';
 import { categories } from '../../data/categories';
 
 const Landing = () => {
-    const featuredCourses = courses.filter((c) => c.isFeatured);
+    const dispatch = useDispatch();
+    const { courses } = useSelector((s) => s.courses);
+
+    useEffect(() => {
+        dispatch(fetchAllCourses({ pageSize: 8, pageNumber: 1 }));
+    }, [dispatch]);
+
+    const featuredCourses = courses.slice(0, 4);
 
     const stats = [
         { icon: HiUsers, value: '50K+', label: 'Active Students' },
@@ -95,7 +104,8 @@ const Landing = () => {
                             <div className="relative">
                                 <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20">
                                     <img
-                                        src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&q=80"
+                                        // src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&q=80"
+                                        src="https://i.postimg.cc/cCL71xx7/Chat-GPT-Image-Jun-19-2026-10-25-25-AM.png"
                                         alt="Students learning"
                                         className="rounded-2xl w-full shadow-2xl"
                                     />
