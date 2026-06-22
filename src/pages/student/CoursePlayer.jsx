@@ -259,7 +259,23 @@ const CoursePlayer = () => {
                                 const fileType = getLessonFileType(activeLesson?.type, lessonDetails.fileUrl);
                                 const cleanFileUrl = lessonDetails.fileUrl?.trim().replace(/`/g, '');
                                 if (fileType === 'video') {
-                                    return <video src={cleanFileUrl} style={{display: 'block', width: '100%', height: '100%'}} controls />;
+                                    const studentEmail = user?.email || 'user@example.com';
+                                    return (
+                                        <div className="relative w-full h-full overflow-hidden">
+                                            <video 
+                                                src={cleanFileUrl} 
+                                                style={{display: 'block', width: '100%', height: '100%'}} 
+                                                controls 
+                                            />
+                                            {/* Repeated Email Watermark (Tiled) */}
+                                            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                                                <div className="w-full h-full" style={{
+                                                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='500' height='300' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='24' fill='rgba(255,255,255,0.15)' transform='rotate(-15 250 150)' text-anchor='middle' dominant-baseline='middle'%3E${encodeURIComponent(studentEmail)}%3C/text%3E%3C/svg%3E")`,
+                                                    backgroundRepeat: 'repeat'
+                                                }} />
+                                            </div>
+                                        </div>
+                                    );
                                 } else if (fileType === 'pdf') {
                                     return (
                                         <div className="flex flex-col items-center h-full bg-white overflow-auto">

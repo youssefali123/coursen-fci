@@ -562,7 +562,7 @@ const EditCourse = () => {
             <div className="bg-card rounded-2xl border border-border p-6 shadow-sm mb-6">
                 <div className="flex items-center justify-between mb-4 border-b border-border/80 pb-3">
                     <h3 className="text-sm font-bold text-text-secondary uppercase tracking-wider">Course Quizzes</h3>
-                    <button onClick={() => navigate('/instructor/quiz/new')} className="text-xs text-primary-600 font-semibold hover:text-primary-700 flex items-center gap-1">
+                    <button onClick={() => navigate(`/instructor/courses/${courseId}/quiz/new`)} className="text-xs text-primary-600 font-semibold hover:text-primary-700 flex items-center gap-1">
                         <HiPlus className="w-3.5 h-3.5" /> Create Quiz
                     </button>
                 </div>

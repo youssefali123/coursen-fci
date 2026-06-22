@@ -20,7 +20,7 @@ const initialState = {
     sortBy: 'popular',
     currentPage: 1,
     totalPages: 1,
-    pageSize: 12,
+    pageSize: 34,
     loading: false,
     error: null,
 };

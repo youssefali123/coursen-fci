@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://coursen.runasp.net";
+const BASE_URL = "https://coursen.runasp.net";
 
 const api = axios.create({
     baseURL: BASE_URL,

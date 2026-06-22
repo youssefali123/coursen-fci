@@ -146,6 +146,7 @@ function App() {
           <Route path="courses/new" element={<CreateCourse />} />
           <Route path="courses/:id/edit" element={<EditCourse />} />
           <Route path="quiz/new" element={<QuizBuilder />} />
+          <Route path="courses/:courseId/quiz/new" element={<QuizBuilder />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="profile" element={<InstructorProfile />} />
         </Route>

@@ -6,6 +6,7 @@ import { HiMenu, HiX, HiSearch, HiBell, HiChevronDown, HiMoon, HiSun } from 'rea
 import { logoutUser } from '../../features/authSlice';
 import { toggleTheme } from '../../features/uiSlice';
 
+
 const Navbar = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [profileDropdown, setProfileDropdown] = useState(false);
